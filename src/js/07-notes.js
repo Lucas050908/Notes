@@ -40,7 +40,7 @@ Screens.notes = (() => {
         const row = h('div.row.simple', h('div.row-inner', { style: { paddingLeft: 16 + depth * 20 + 'px', cursor: 'pointer' }, role: 'button', tabindex: 0,
           onclick: e => { if (e.target.closest('.exp')) return; haptic.tap(); openFolder(f.id); },
           oncontextmenu: e => { e.preventDefault(); folderActions(f); } },
-          kids ? h('button.exp.iconbtn', { style: { width: '24px', height: '34px', marginLeft: '-6px', transform: expanded.has(f.id) ? 'rotate(90deg)' : '', transition: 'transform .2s' }, 'aria-label': 'Udvid', html: icon('chev', 'xs'), onclick: () => { expanded.has(f.id) ? expanded.delete(f.id) : expanded.add(f.id); render(); } }) : null,
+          kids ? h('button.exp.iconbtn', { style: { width: '32px', height: '34px', marginLeft: '-10px', transform: expanded.has(f.id) ? 'rotate(90deg)' : '', transition: 'transform .2s' }, 'aria-label': 'Udvid', html: icon('chev', 'xs'), onclick: () => { expanded.has(f.id) ? expanded.delete(f.id) : expanded.add(f.id); render(); } }) : null,
           h('div.row-ico.c', { style: { background: f.color }, html: icon('folder', 'sm') }),
           h('div.row-main', h('div.row-title', h('span.t', { text: f.name }))),
           h('span.row-count', { text: count }),

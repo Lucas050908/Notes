@@ -209,8 +209,11 @@ const Pop = {
     const w = Math.min(280, window.innerWidth - 24);
     el.style.width = w + 'px';
     el.style.left = clamp(rect.left, 12, window.innerWidth - w - 12) + 'px';
-    const below = rect.bottom + 6, hgt = Math.min(300, el.scrollHeight);
-    el.style.top = (below + hgt > vh - 60 ? Math.max(12, rect.top - hgt - 6) : below) + 'px';
+    const bar = document.querySelector('.edbar.on'); const reserved = bar ? bar.offsetHeight + 8 : 60;
+    const below = rect.bottom + 6; let hgt = Math.min(300, el.scrollHeight);
+    const spaceBelow = vh - reserved - below, spaceAbove = rect.top - 12 - (window.visualViewport ? window.visualViewport.offsetTop : 0);
+    if (hgt > spaceBelow && spaceAbove > spaceBelow) { hgt = Math.min(hgt, spaceAbove - 6); el.style.maxHeight = hgt + 'px'; el.style.top = Math.max(12, rect.top - hgt - 6) + 'px'; }
+    else { if (hgt > spaceBelow) el.style.maxHeight = Math.max(120, spaceBelow) + 'px'; el.style.top = below + 'px'; }
     this.cur = el;
     return el;
   },

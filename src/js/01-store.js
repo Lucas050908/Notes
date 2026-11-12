@@ -243,8 +243,9 @@ function deriveNote(n) {
   };
 }
 function htmlToText(html) {
-  _parseTpl.innerHTML = (html || '').replace(/<(\/p|\/h[1-6]|\/li|br|\/blockquote|\/pre|\/tr|hr)[^>]*>/gi, '$&\n');
+  _parseTpl.innerHTML = (html || '').replace(/<(\/p|\/h[1-6]|\/li|br|\/blockquote|\/pre|\/tr|hr)[^>]*>/gi, '$&\n').replace(/<\/t[dh]>/gi, ' $&');
   $$('.due', _parseTpl.content).forEach(x => x.remove());
+  $$('.att', _parseTpl.content).forEach(x => x.replaceWith('📎 ' + (x.getAttribute('data-name') || 'Fil') + '\n'));
   return _parseTpl.content.textContent.replace(/\n{3,}/g, '\n\n').trim();
 }
 function noteTitle(n) { return (n && n.title && n.title.trim()) || (n && (Store.d(n)?.text || '').split('\n')[0].trim().slice(0, 60)) || 'Ny note'; }
