@@ -29,7 +29,11 @@ jobs:
           java-version: 21
           cache: gradle
 
-      - uses: android-actions/setup-android@v3
+      - name: Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
       - name: Installér afhængigheder
         run: npm ci
