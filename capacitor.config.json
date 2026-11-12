@@ -1,0 +1,12 @@
+{
+  "appId": "dk.lucas.notabene",
+  "appName": "Notabene",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#12110f"
+  },
+  "backgroundColor": "#12110f"
+}

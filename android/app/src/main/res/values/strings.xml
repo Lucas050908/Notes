@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Notabene</string>
+    <string name="title_activity_main">Notabene</string>
+    <string name="package_name">dk.lucas.notabene</string>
+    <string name="custom_url_scheme">dk.lucas.notabene</string>
+</resources>

@@ -1,0 +1,70 @@
+name: Byg Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Installér afhængigheder
+        run: npm ci
+
+      - name: Byg web-appen
+        run: python3 scripts/build_web.py
+
+      - name: Synkronisér Capacitor
+        run: npx cap sync android
+
+      - name: Byg APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -PversionCode=${{ github.run_number }} \
+            -PversionName=1.0.${{ github.run_number }}
+
+      - name: Navngiv APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk out/Notabene-1.0.${{ github.run_number }}.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Notabene-1.0.${{ github.run_number }}
+          path: out/*.apk
+
+      - name: Udgiv som release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Notabene 1.0.${{ github.run_number }}
+          body: |
+            Download **Notabene-1.0.${{ github.run_number }}.apk** nedenfor og åbn den på din Android-telefon.
+            Første gang skal du tillade installation fra din browser/filhåndtering.
+          files: out/*.apk
+          make_latest: true

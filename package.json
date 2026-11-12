@@ -1,0 +1,27 @@
+{
+  "name": "notabene",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Notabene – en mobile-first notes-app (Capacitor/Android)",
+  "scripts": {
+    "build": "python3 scripts/build_web.py",
+    "sync": "npm run build && npx cap sync android",
+    "apk:debug": "npm run sync && cd android && ./gradlew assembleDebug",
+    "apk:release": "npm run sync && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/share": "8.0.3",
+    "@capacitor/status-bar": "8.0.4",
+    "@fontsource/caveat": "5.2.8",
+    "@fontsource/newsreader": "5.2.8",
+    "jszip": "3.10.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}
