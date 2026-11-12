@@ -19,6 +19,7 @@ window.Capacitor = {
       readFile: async (o) => ({ data: __native.files[o.path] }), deleteFile: async (o) => { delete __native.files[o.path]; } },
     Share: { share: async (o) => { __native.shared.push(o); } },
     StatusBar: { setStyle: async () => {}, setBackgroundColor: async () => {} },
+    NotabeneWidget: { update: async (o) => { __native.widget = JSON.parse(o.data); }, consumeAction: async () => { const a = __native.pendingAction || null; __native.pendingAction = null; return { action: a }; } },
     LocalNotifications: { checkPermissions: async () => ({ display: 'granted' }), requestPermissions: async () => ({ display: 'granted' }),
       getPending: async () => ({ notifications: __native.scheduled || [] }), cancel: async () => { __native.scheduled = []; },
       schedule: async (o) => { __native.scheduled = o.notifications; }, addListener: (ev, fn) => { __native.listeners[ev] = fn; } },
@@ -455,6 +456,17 @@ async def main():
             await pg.evaluate('AutoBackup.sheet()'); await pg.wait_for_timeout(500)
             await pg.click('.sheet.on .menu-list .mi'); await pg.wait_for_timeout(400); await pg.click('.dialog .btn:has-text("Gendan")'); await pg.wait_for_timeout(600)
             expect(await pg.evaluate(f"!!Store.get('{nid0}')"), 'restore from auto backup failed')
+            # widget: receives open tasks, and a widget tap opens the right place
+            await pg.evaluate("Tasks.add('Widgetopgave', ymd())"); await pg.wait_for_timeout(1900)
+            wd = await pg.evaluate('__native.widget')
+            expect(wd and any(t['text'] == 'Widgetopgave' and t['due'] for t in wd['tasks']), f'widget data: {wd}')
+            await pg.evaluate("__native.pendingAction = 'new'; __native.listeners.resume()"); await pg.wait_for_timeout(700)
+            expect(await pg.evaluate('Nav.stack.length') == 1, 'widget "new" did not open an editor')
+            await pg.evaluate("__native.listeners.backButton()"); await pg.wait_for_timeout(500)
+            wid = [t for t in wd['tasks'] if t['text'] == 'Widgetopgave'][0]['noteId']
+            await pg.evaluate(f"__native.pendingAction = 'open:{wid}'; __native.listeners.resume()"); await pg.wait_for_timeout(700)
+            expect(await pg.evaluate('Nav.top().noteId') == wid, 'widget task tap did not open its note')
+            await pg.evaluate("__native.listeners.backButton()"); await pg.wait_for_timeout(500)
             # reminders: a task due tomorrow gets one notification at 09:00
             await pg.evaluate("Tasks.add('Påmind mig', ymd(addDays(new Date(), 1)))"); await pg.wait_for_timeout(2600)
             sch = await pg.evaluate("(__native.scheduled || []).map(n => [n.title, new Date(n.schedule.at).getHours(), n.extra.noteId])")

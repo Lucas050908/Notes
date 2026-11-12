@@ -4,4 +4,9 @@
     <string name="title_activity_main">Notabene</string>
     <string name="package_name">dk.lucas.notabene</string>
     <string name="custom_url_scheme">dk.lucas.notabene</string>
+    <string name="widget_new_note">Ny note</string>
+    <string name="widget_today_desc">Dagens opgaver på en sticky note</string>
+    <string name="widget_quick_desc">Skriv en ny note med ét tryk</string>
+    <string name="widget_today_label">Notabene · I dag</string>
+    <string name="widget_quick_label">Notabene · Ny note</string>
 </resources>

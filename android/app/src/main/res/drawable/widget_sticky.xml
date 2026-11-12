@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yellow sticky note with a soft drop shadow, folded corner radius and a strip of tape. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:top="3dp" android:left="1dp" android:right="1dp" android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#33000000" />
+            <corners android:topLeftRadius="4dp" android:topRightRadius="4dp" android:bottomLeftRadius="4dp" android:bottomRightRadius="20dp" />
+        </shape>
+    </item>
+    <item android:top="6dp" android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#F3D867" />
+            <corners android:topLeftRadius="3dp" android:topRightRadius="3dp" android:bottomLeftRadius="3dp" android:bottomRightRadius="18dp" />
+        </shape>
+    </item>
+    <item android:width="64dp" android:height="14dp" android:gravity="top|center_horizontal">
+        <shape android:shape="rectangle">
+            <solid android:color="#80FFFFFF" />
+            <corners android:radius="1dp" />
+        </shape>
+    </item>
+</layer-list>

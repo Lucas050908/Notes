@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="4dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@drawable/widget_sticky" android:paddingStart="16dp" android:paddingEnd="12dp" android:paddingTop="18dp" android:paddingBottom="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                <TextView android:id="@+id/date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/caveat_bold" android:textColor="#1D1B17" android:textSize="24sp" android:includeFontPadding="false" android:maxLines="1" />
+                <TextView android:id="@+id/count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#736C5B" android:textSize="12sp" />
+            </LinearLayout>
+            <ImageView android:id="@+id/add" android:layout_width="38dp" android:layout_height="38dp" android:padding="2dp" android:src="@drawable/widget_add" android:contentDescription="@string/widget_new_note" />
+        </LinearLayout>
+        <TextView android:id="@+id/empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="#4B4639" android:textSize="14sp" android:visibility="gone" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="6dp">
+        <LinearLayout android:id="@+id/task1" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp" android:paddingBottom="5dp" android:visibility="gone">
+            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/widget_box" android:contentDescription="@null" />
+            <TextView android:id="@+id/task1_text" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="9dp" android:textColor="#1D1B17" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/task1_due" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="#2B4BD8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task2" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp" android:paddingBottom="5dp" android:visibility="gone">
+            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/widget_box" android:contentDescription="@null" />
+            <TextView android:id="@+id/task2_text" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="9dp" android:textColor="#1D1B17" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/task2_due" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="#2B4BD8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task3" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp" android:paddingBottom="5dp" android:visibility="gone">
+            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/widget_box" android:contentDescription="@null" />
+            <TextView android:id="@+id/task3_text" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="9dp" android:textColor="#1D1B17" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/task3_due" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="#2B4BD8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task4" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp" android:paddingBottom="5dp" android:visibility="gone">
+            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/widget_box" android:contentDescription="@null" />
+            <TextView android:id="@+id/task4_text" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="9dp" android:textColor="#1D1B17" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/task4_due" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="#2B4BD8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task5" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="5dp" android:paddingBottom="5dp" android:visibility="gone">
+            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/widget_box" android:contentDescription="@null" />
+            <TextView android:id="@+id/task5_text" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="9dp" android:textColor="#1D1B17" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/task5_due" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="#2B4BD8" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

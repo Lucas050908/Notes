@@ -19,6 +19,7 @@ Hver gang der pushes til `main`, bygger GitHub Actions en signeret APK:
 - **Data:** offline-first (IndexedDB), versionshistorik pr. note, automatisk daglig backup (de seneste 7 kan gendannes), backup som JSON og eksport som Markdown-zip. Import virker fra Markdown, TXT, HTML, Evernote (.enex) og Notabene-backup.
 - **Påmindelser:** Android-notifikationer for opgaver med dato, kl. 09:00 som standard. Tidspunktet kan ændres i Indstillinger, og et tryk på notifikationen åbner noten.
 - **Android:** tilbageknap, haptik, del-ark til eksport og adaptivt ikon
+- **Widgets på hjemmeskærmen:** "I dag" er en gul sticky note med dagens og forfaldne opgaver plus en +-knap, og et tryk på en opgave åbner noten. "Ny note" er en 1×1-post-it, der åbner en ny note med ét tryk. Tilføj dem ved at holde fingeren på hjemmeskærmen → Widgets → Notabene.
 
 ## Ikke i v1
 - **Cloud-sync mellem enheder i APK'en:** den kræver en backend (fx Supabase). Sync-laget (`src/js/02-sync.js`) er bygget med konflikthåndtering og bruges allerede, når appen kører som claude.ai-artifact.
