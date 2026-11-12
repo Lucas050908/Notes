@@ -264,12 +264,15 @@ class Editor {
     b.addEventListener('beforeinput', e => {
       if (e.inputType === 'historyUndo') { e.preventDefault(); return this.undo(); }
       if (e.inputType === 'historyRedo') { e.preventDefault(); return this.redo(); }
+      if (e.inputType === 'insertParagraph' && this.onEnter(e)) return;
+      if (e.inputType === 'deleteContentBackward' && this.onBackspace(e)) return;
       const H = this.hist, tnow = now();
       const typing = e.inputType === 'insertText' && e.data && !/\s/.test(e.data);
       if (!typing || tnow - H.lastAt > 1200 || H.lastType !== 'type') this.record();
       H.lastAt = tnow; H.lastType = typing ? 'type' : e.inputType;
     });
     b.addEventListener('input', e => this.onInput(e));
+    b.addEventListener('compositionend', () => setTimeout(() => this.afterTyping(), 0));
     b.addEventListener('keydown', e => this.onKey(e));
     b.addEventListener('paste', e => this.onPaste(e));
     b.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); [...e.dataTransfer.files].forEach(f => this.insertFile(f, f.type.startsWith('image/') ? 'image' : 'file')); } });
@@ -321,15 +324,22 @@ class Editor {
       if (blk.tagName === 'LI') { const due = blk.querySelector(':scope > .due'); if (due && !blk.textContent.replace(due.textContent, '').trim()) due.remove(); }
       if (/^H[1-3]$/.test(blk.tagName) && !blk.textContent.trim() && blk.previousElementSibling && /^H[1-3]$/.test(blk.previousElementSibling.tagName)) { const p = h('p', h('br')); blk.replaceWith(p); this.focusEnd(p); }
     }
-    if (e.inputType === 'insertText' && e.data) {
-      if (e.data === ' ' && blk) this.mdShortcut(blk);
-      if (/[*_~`=]/.test(e.data)) this.inlineShortcut();
-      if (e.data === '/') this.maybeSlash(blk);
-      if (e.data === '[' && this.textBeforeCaret(blk).endsWith('[[')) this.startNoteLink(true);
-      if (Pop.cur && this.popTrack) this.popTrack();
-    } else if (Pop.cur && this.popTrack) this.popTrack();
-    if (e.inputType === 'insertText' && e.data === '`' && blk && blk.tagName === 'P' && this.textBeforeCaret(blk) === '```') { this.record(); blk.textContent = ''; this.setBlock('pre'); }
+    if (!e.isComposing && /^insert(Text|CompositionText|ReplacementText)$/.test(e.inputType)) this.afterTyping();
+    else if (Pop.cur && this.popTrack) this.popTrack();
     this.changed();
+  }
+  /** Runs typing shortcuts from the text before the caret, so it works for hardware keys and Android IMEs alike. */
+  afterTyping() {
+    const blk = this.block(); if (!blk) return;
+    const before = this.textBeforeCaret(blk); const last = before.slice(-1);
+    if (last === ' ' || last === '\u00a0') this.mdShortcut(blk);
+    else if (/[*_~`=]/.test(last)) {
+      if (blk.tagName === 'P' && before === '```') { this.record(); blk.innerHTML = '<br>'; this.setBlock('pre'); return; }
+      this.inlineShortcut();
+    }
+    if (last === '/') this.maybeSlash(blk);
+    if (before.endsWith('[[') && !this.popTrack) this.startNoteLink(true);
+    if (Pop.cur && this.popTrack) this.popTrack();
   }
 
   mdShortcut(blk) {
@@ -398,26 +408,40 @@ class Editor {
       if (blk.closest('td,th')) { e.preventDefault(); const cells = $$('td,th', blk.closest('table')); const i = cells.indexOf(blk.closest('td,th')); const nx = cells[i + (e.shiftKey ? -1 : 1)]; if (nx) this.focusEnd(nx); else if (!e.shiftKey) { this.tableOp('addRow', blk.closest('td,th')); } return; }
       if (blk.tagName === 'PRE') { e.preventDefault(); document.execCommand('insertText', false, '  '); return; }
     }
-    if (e.key === 'Enter' && !e.shiftKey && blk) {
-      if (blk.tagName === 'PRE') {
-        e.preventDefault();
-        const txt = this.textBeforeCaret(blk);
-        if (txt.endsWith('\n\n') || (txt.endsWith('\n') && blk.textContent.endsWith('\n') && txt.length >= blk.textContent.length)) {
-          this.record(); blk.textContent = blk.textContent.replace(/\n+$/, ''); const p = h('p', h('br')); blk.after(p); this.focusEnd(p); this.changed(); return;
-        }
-        document.execCommand('insertText', false, '\n'); return;
+  }
+
+  /** Enter (from keydown or an IME's beforeinput). Returns true when handled. */
+  onEnter(e) {
+    if (Pop.cur && this.popChoose) { e.preventDefault(); this.popChoose(); return true; }
+    const blk = this.block(); if (!blk) return false;
+    if (blk.tagName === 'PRE') {
+      e.preventDefault(); this.record();
+      $$('br', blk).forEach(br => br.replaceWith('\n'));
+      blk.normalize();
+      const r = this.range(); if (!r) return true; r.deleteContents();
+      const before = this.textBeforeCaret(blk), all = blk.textContent;
+      const after = all.slice(before.length);
+      if (before.endsWith('\n') && !after.replace(/\n/g, '')) {
+        blk.textContent = all.replace(/\n+$/, '');
+        const p = h('p', h('br')); blk.after(p); this.focusEnd(p); this.changed(); return true;
       }
-      const cell = blk.closest('td,th'); if (cell) { e.preventDefault(); document.execCommand('insertLineBreak'); return; }
-      if (blk.tagName === 'BLOCKQUOTE' && !blk.textContent.trim()) { e.preventDefault(); this.record(); const p = h('p', h('br')); blk.replaceWith(p); this.focusEnd(p); this.changed(); return; }
+      const tn = document.createTextNode('\n'); r.insertNode(tn);
+      if (!after) tn.after(document.createTextNode('\n'));
+      const c = document.createRange(); c.setStartAfter(tn); c.collapse(true); getSelection().removeAllRanges(); getSelection().addRange(c);
+      this.changed(); return true;
     }
-    if (e.key === 'Backspace' && blk) {
-      const r = this.range();
-      if (r && r.collapsed && this.textBeforeCaret(blk) === '' ) {
-        if (/^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(blk.tagName)) { e.preventDefault(); this.record(); this.setBlock('p', blk); this.changed(); return; }
-        const prev = blk.previousElementSibling;
-        if (prev && prev.matches('div.att,div.tw,hr') && blk.parentNode === this.body) { e.preventDefault(); this.record(); prev.remove(); this.changed(); return; }
-      }
-    }
+    if (blk.closest('td,th')) { e.preventDefault(); document.execCommand('insertLineBreak'); return true; }
+    if (blk.tagName === 'BLOCKQUOTE' && !blk.textContent.trim()) { e.preventDefault(); this.record(); const p = h('p', h('br')); blk.replaceWith(p); this.focusEnd(p); this.changed(); return true; }
+    return false;
+  }
+  /** Backspace at the start of a block. Returns true when handled. */
+  onBackspace(e) {
+    const blk = this.block(); const r = this.range();
+    if (!blk || !r || !r.collapsed || this.textBeforeCaret(blk) !== '') return false;
+    if (/^(H1|H2|H3|BLOCKQUOTE|PRE)$/.test(blk.tagName)) { e.preventDefault(); this.record(); this.setBlock('p', blk); this.changed(); return true; }
+    const prev = blk.previousElementSibling;
+    if (prev && prev.matches('div.att,div.tw,hr') && blk.parentNode === this.body) { e.preventDefault(); this.record(); prev.remove(); this.changed(); return true; }
+    return false;
   }
 
   onPaste(e) {
@@ -701,8 +725,8 @@ class Editor {
       try { del.setStart(startNode, startOff); del.setEnd(r.startContainer, r.startOffset); del.deleteContents(); } catch (e) {}
       close(); haptic.tap(); this.record(); it.run(); this.changed();
     };
-    const close = () => { Pop.close(); this.popTrack = null; this.popKeys = null; };
-    this.popTrack = draw;
+    const close = () => { Pop.close(); this.popTrack = null; this.popKeys = null; this.popChoose = null; };
+    this.popTrack = draw; this.popChoose = () => choose(idx);
     this.popKeys = (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % items.length; draw(); return true; }
       if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx - 1 + items.length) % items.length; draw(); return true; }

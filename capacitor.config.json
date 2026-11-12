@@ -8,5 +8,11 @@
     "webContentsDebuggingEnabled": false,
     "backgroundColor": "#12110f"
   },
-  "backgroundColor": "#12110f"
+  "backgroundColor": "#12110f",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notabene",
+      "iconColor": "#F3D867"
+    }
+  }
 }

@@ -63,7 +63,7 @@ const Sync = {
     const local = Store.notes.get(id);
     if (local && r.wid && r.wid === local.baseWid) return;
     if (local && r.dev === DEVICE_ID && this.ownWids.has(r.wid)) { return; }
-    const remoteNote = { ...r, id, dirty: false, baseWid: r.wid };
+    const remoteNote = { ...r, id, html: sanitizeHtml(String(r.html || '<p></p>')), title: String(r.title || ''), dirty: false, baseWid: r.wid };
     delete remoteNote.dev; delete remoteNote.wid; delete remoteNote.seq;
     if (!local) {
       Store.notes.set(id, remoteNote); Store.persist(remoteNote); Bus.emit('notes', { id, type: 'remote' }); return;

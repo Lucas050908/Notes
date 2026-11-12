@@ -223,3 +223,44 @@ function templatePicker() {
     body.append(h('p', { style: { color: 'var(--ink-3)', fontSize: '13px', marginTop: '14px' }, text: 'Gem en hvilken som helst note som skabelon via ••• i noten.' }));
   } });
 }
+
+/* ---------- Reminders: native notifications for dated tasks (Android app) ---------- */
+const Reminders = {
+  get LN() { return Native.on ? Native.plugin('LocalNotifications') : null; },
+  get supported() { return !!this.LN; },
+  init() {
+    if (!this.supported) return;
+    try { this.LN.addListener('localNotificationActionPerformed', ev => { const id = ev && ev.notification && ev.notification.extra && ev.notification.extra.noteId; if (id && Store.get(id)) openNote(id); }); } catch (e) {}
+    Bus.on('notes', e => { if (!e || e.type !== 'closed') this.schedule(); });
+    Bus.on('settings', () => this.schedule());
+    this.schedule();
+  },
+  hash(s) { let x = 0; for (let i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) | 0; return Math.abs(x) % 2000000000 + 1; },
+  async permitted(ask) {
+    try {
+      let p = await this.LN.checkPermissions();
+      if (p.display !== 'granted' && ask) p = await this.LN.requestPermissions();
+      return p.display === 'granted';
+    } catch (e) { return false; }
+  },
+  schedule: debounce(async function () {
+    const R = Reminders; if (!R.supported) return;
+    try {
+      const pending = await R.LN.getPending();
+      if (pending && pending.notifications && pending.notifications.length) await R.LN.cancel({ notifications: pending.notifications.map(n => ({ id: n.id })) });
+      if (Store.setting('remind') === false) return;
+      const [hh, mm] = String(Store.setting('remindAt') || '09:00').split(':').map(Number);
+      const nowMs = now();
+      const items = Tasks.all().filter(t => !t.done && t.due).map(t => { const d = parseYmd(t.due); d.setHours(hh || 0, mm || 0, 0, 0); return { t, at: d }; })
+        .filter(x => x.at.getTime() > nowMs + 30000).sort((a, b) => a.at - b.at).slice(0, 60);
+      if (!items.length) return;
+      const asked = await Store.kvGet('remindAsked');
+      if (!await R.permitted(!asked)) { Store.kvSet('remindAsked', true); return; }
+      Store.kvSet('remindAsked', true);
+      await R.LN.schedule({ notifications: items.map(({ t, at }) => ({
+        id: R.hash(t.noteId + '|' + t.text), title: t.text.slice(0, 120), body: `${fmtDue(t.due)} · ${t.noteTitle}`,
+        schedule: { at, allowWhileIdle: true }, extra: { noteId: t.noteId }, smallIcon: 'ic_stat_notabene', iconColor: '#F3D867',
+      })) });
+    } catch (e) { console.warn('reminders', e); }
+  }, 2000),
+};

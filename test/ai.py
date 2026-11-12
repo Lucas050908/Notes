@@ -14,7 +14,7 @@ window.fetch = async (url, opts) => {
   if (body.tools && typeof last.content === 'string') {
     return sse([{type:'content_block_start',index:0,content_block:{type:'text',text:''}},{type:'content_block_delta',index:0,delta:{type:'text_delta',text:'Jeg søger. '}},{type:'content_block_start',index:1,content_block:{type:'tool_use',id:'t1',name:'search_notes',input:{}}},{type:'content_block_delta',index:1,delta:{type:'input_json_delta',partial_json:'{"query":"som'}},{type:'content_block_delta',index:1,delta:{type:'input_json_delta',partial_json:'merhus"}'}},{type:'message_delta',delta:{stop_reason:'tool_use'}}]);
   }
-  if (body.tools) { const r = JSON.parse(last.content[0].content); return sse(text('Fandt [' + r[0].title + '](note:' + r[0].id + ') med 2 opgaver.')); }
+  if (body.tools) { const r = JSON.parse(last.content[0].content); return sse(text(r[0] ? 'Fandt [' + r[0].title + '](note:' + r[0].id + ') med 2 opgaver.' : 'Fandt ingen noter om det.')); }
   const p = typeof last.content === 'string' ? last.content : '';
   if (p.includes('Svar KUN med gyldig JSON')) return sse(text('{"tags":["byggeri","sommerhus"]}'));
   if (p.includes('OK')) return sse(text('OK'));

@@ -26,7 +26,7 @@ const AI = {
     if (c === 401 || c === 'auth') return 'API-nøglen blev afvist. Tjek den under Indstillinger.';
     if (c === 429 || c === 'rate_limited') return 'For mange forespørgsler lige nu. Prøv igen om lidt.';
     if (c === 'not_granted') return 'AI blev ikke tilladt i denne visning.';
-    if (c === 'offline' || (e && e.name === 'TypeError')) return 'Ingen forbindelse. AI kræver internet; dine noter virker stadig offline.';
+    if (c === 'offline' || (e && e.name === 'TypeError' && /fetch|network|load failed/i.test(e.message || ''))) return 'Ingen forbindelse. AI kræver internet; dine noter virker stadig offline.';
     return (e && e.message) ? 'AI-fejl: ' + e.message : 'AI svarede ikke. Prøv igen.';
   },
 

@@ -575,3 +575,4 @@ mark.hl-orange { background: var(--hl-orange); color: inherit; border-radius: 3p
 .tile .ti { border-radius: 6px 6px 10px 6px; }
 .tile b { font: 700 22px/1 var(--font-hand); }
 .stdot { width: 10px; height: 10px; border-radius: 2px 2px 4px 2px; background: var(--st); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.sticky, .row-inner, .tile, .chip, .tabbar, .fab, .mi { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

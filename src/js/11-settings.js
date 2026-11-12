@@ -103,12 +103,16 @@ function openSettings() {
         item('text', 'Skriftstørrelse i noter', ({ 15: 'Lille', 17: 'Normal', 19: 'Stor', 21: 'Ekstra stor' })[size] || size, () => UI.menu('Skriftstørrelse', [[15, 'Lille'], [17, 'Normal'], [19, 'Stor'], [21, 'Ekstra stor']].map(([k, l]) => ({ label: l, right: k === size ? icon('check', 'sm') : '', onClick: () => { Store.setSetting('edSize', k); applyTheme(); s.render(); } }))))),
       ...group('AI',
         item('spark', AI.provider === 'claude' ? 'AI via Claude' : 'Anthropic API-nøgle', AI.provider === 'claude' ? 'Aktiv' : AI.key ? '••••' + esc(AI.key.slice(-4)) : 'Ikke sat', () => apiKeySheet()),
-        AI.provider === 'api' ? item('wand', 'Model', esc(AI.model), () => UI.menu('Model', [['claude-sonnet-5-5', 'Sonnet 5.5 · anbefalet'], ['claude-haiku-5-5', 'Haiku 5.5 · hurtigst og billigst'], ['claude-opus-5-5', 'Opus 5.5 · stærkest']].map(([k, l]) => ({ label: l, right: k === AI.model ? icon('check', 'sm') : '', onClick: async () => { AI.model = k; await Store.kvSet('aiModel', k); s.render(); } })))) : null),
+        AI.provider === 'api' ? item('wand', 'Model', ({ 'claude-sonnet-5-5': 'Sonnet 5.5', 'claude-haiku-5-5': 'Haiku 5.5', 'claude-opus-5-5': 'Opus 5.5' })[AI.model] || esc(AI.model), () => UI.menu('Model', [['claude-sonnet-5-5', 'Sonnet 5.5 · anbefalet'], ['claude-haiku-5-5', 'Haiku 5.5 · hurtigst og billigst'], ['claude-opus-5-5', 'Opus 5.5 · stærkest']].map(([k, l]) => ({ label: l, right: k === AI.model ? icon('check', 'sm') : '', onClick: async () => { AI.model = k; await Store.kvSet('aiModel', k); s.render(); } })))) : null),
       ...group('Data',
         h('div.mi', { html: icon(Sync.state === 'local' ? 'lock' : 'cloud') + `<span>${Sync.state === 'local' ? 'Gemt på denne enhed' : 'Synkronisering'}<small style="display:block;color:var(--ink-3);font-size:13px">${esc(Sync.state === 'local' ? (IDB.persistent ? 'Fungerer helt offline. Tag backup jævnligt.' : 'Lagring er midlertidig i denne visning.') : (Sync.message || Sync.label()))}</small></span><span class="r"><span class="sync-dot ${Sync.state === 'synced' || Sync.state === 'local' ? 'ok' : Sync.state === 'error' ? 'err' : 'busy'}"></span></span>` }),
+        Native.on ? item('history', 'Automatiske backups', 'Dagligt', () => AutoBackup.sheet()) : null,
         item('download', 'Tag backup (JSON)', `${all} noter`, () => exportBackup()),
         item('download', 'Eksportér som Markdown (zip)', null, () => exportMarkdownZip()),
         item('upload', 'Importér', 'MD, TXT, HTML, JSON, ENEX', () => importFiles())),
+      ...(Reminders.supported ? group('Påmindelser',
+        h('button.mi', { html: icon('clock') + '<span>Påmind om opgaver med dato</span>' + `<span class="sw${Store.setting('remind') !== false ? ' on' : ''}"></span>`, onclick: async () => { const on = Store.setting('remind') === false; if (on && !await Reminders.permitted(true)) { UI.toast('Tillad notifikationer for Notabene i Android-indstillingerne'); } Store.setSetting('remind', on); s.render(); } }),
+        item('clock', 'Tidspunkt', esc(Store.setting('remindAt') || '09:00'), () => UI.menu('Påmind kl.', ['07:00', '08:00', '09:00', '12:00', '17:00', '20:00'].map(t => ({ label: t, right: t === (Store.setting('remindAt') || '09:00') ? icon('check', 'sm') : '', onClick: () => { Store.setSetting('remindAt', t); s.render(); } }))))) : []),
       ...group('Papirkurv', item('trash', 'Slet automatisk efter', `${Store.setting('trashDays') || 30} dage`, () => UI.menu('Slet efter', [7, 30, 90, 365].map(d => ({ label: `${d} dage`, right: d === (Store.setting('trashDays') || 30) ? icon('check', 'sm') : '', onClick: () => { Store.setSetting('trashDays', d); s.render(); } }))))),
       h('div.fmt-label', { text: 'Om' }),
       h('div.card', { style: { padding: '16px', fontSize: '14px', color: 'var(--ink-2)', lineHeight: 1.55 } },
@@ -149,9 +153,46 @@ function apiKeySheet() {
 }
 
 /* ---------- Export ---------- */
-async function exportBackup() {
+async function backupData() {
   const blobs = await IDB.all('blobs').catch(() => []);
-  const data = { app: 'margin', version: 1, exportedAt: new Date().toISOString(), notes: [...Store.notes.values()].map(n => { const c = { ...n }; delete c.dirty; delete c.baseWid; delete c.localSeq; return c; }), meta: Store.meta, blobs };
+  return { app: 'margin', version: 1, exportedAt: new Date().toISOString(), notes: [...Store.notes.values()].map(n => { const c = { ...n }; delete c.dirty; delete c.baseWid; delete c.localSeq; return c; }), meta: Store.meta, blobs };
+}
+/* Daily automatic backup inside the app's private storage (Android), last 7 kept. */
+const AutoBackup = {
+  get FS() { return Native.on ? Native.plugin('Filesystem') : null; },
+  async run(force = false) {
+    const FS = this.FS; if (!FS || !Store.notes.size) return;
+    const last = await Store.kvGet('autoBackupAt');
+    if (!force && last && now() - last < 20 * 3600000) return;
+    try {
+      await FS.writeFile({ path: `backups/notabene-${ymd()}.json`, data: JSON.stringify(await backupData()), directory: 'DATA', encoding: 'utf8', recursive: true });
+      Store.kvSet('autoBackupAt', now());
+      const files = await this.list();
+      for (const f of files.slice(7)) await FS.deleteFile({ path: 'backups/' + f.name, directory: 'DATA' }).catch(() => {});
+    } catch (e) { console.warn('auto backup', e); }
+  },
+  async list() {
+    try { const r = await this.FS.readdir({ path: 'backups', directory: 'DATA' }); return (r.files || []).map(f => typeof f === 'string' ? { name: f } : f).filter(f => /\.json$/.test(f.name)).sort((a, b) => b.name.localeCompare(a.name)); }
+    catch (e) { return []; }
+  },
+  async sheet() {
+    const files = await this.list();
+    Sheet.open({ title: 'Automatiske backups', build: (body, sheet) => {
+      body.append(h('p', { style: { color: 'var(--ink-2)', fontSize: '14px', margin: '0 0 12px' }, text: 'Notabene gemmer én backup om dagen på telefonen og beholder de seneste 7. Når du gendanner, kommer slettede og ældre noter tilbage. Nyere ændringer bevares.' }));
+      if (!files.length) body.append(UI.empty('history', 'Ingen backups endnu', 'Den første laves automatisk i dag.'));
+      const list = h('div.menu-list');
+      files.forEach(f => list.append(h('button.mi', { html: icon('history') + `<span>${esc(f.name.replace(/^notabene-|\.json$/g, ''))}</span>` + (f.size ? `<span class="r">${fmtSize(f.size)}</span>` : ''), onclick: async () => {
+        if (!await UI.confirm({ title: 'Gendan backup?', text: `Noter fra ${f.name.replace(/^notabene-|\.json$/g, '')} lægges ind igen. Dine nyere ændringer bliver ikke overskrevet.`, ok: 'Gendan' })) return;
+        try { const r = await this.FS.readFile({ path: 'backups/' + f.name, directory: 'DATA', encoding: 'utf8' }); const n = await importBackup(JSON.parse(r.data)); sheet.close(); Nav.refresh(); UI.toast(`${n} noter gendannet`); }
+        catch (e) { UI.toast('Backuppen kunne ikke læses'); }
+      } })));
+      if (files.length) body.append(list);
+      body.append(h('button.btn.ghost.block', { style: { marginTop: '14px' }, text: 'Tag backup nu', onclick: async () => { await this.run(true); sheet.close(); UI.toast('Backup gemt'); } }));
+    } });
+  },
+};
+async function exportBackup() {
+  const data = await backupData();
   const ok = await saveFile(`notabene-backup-${ymd()}.json`, JSON.stringify(data));
   if (ok) { Store.kvSet('lastBackup', now()); UI.toast('Backup klar'); }
 }
@@ -189,14 +230,14 @@ function importFiles() {
   document.body.append(inp); inp.click();
 }
 function importMarkdown(text, filename) {
-  let title = filename.replace(/\.[^.]+$/, ''), tags = ['importeret'], body = text;
+  let title = filename.replace(/\.[^.]+$/, ''), tags = ['importeret'], body = text, titled = false;
   const fm = text.match(/^---\n([\s\S]*?)\n---\n?/);
   if (fm) {
     body = text.slice(fm[0].length);
-    const t = fm[1].match(/^title:\s*"?(.*?)"?\s*$/m); if (t) title = t[1];
+    const t = fm[1].match(/^title:\s*"?(.*?)"?\s*$/m); if (t) { title = t[1]; titled = true; }
     const tg = fm[1].match(/^tags:\s*\[(.*)\]/m); if (tg) tags = tg[1].split(',').map(x => x.trim().replace(/^#/, '')).filter(Boolean);
   }
-  const h1 = body.match(/^#\s+(.+)\n/); if (h1 && body.trimStart().startsWith('#')) { title = h1[1].trim(); body = body.replace(h1[0], ''); }
+  const h1 = body.trimStart().match(/^#\s+(.+)(\n|$)/); if (h1 && !titled) { title = h1[1].trim(); body = body.trimStart().slice(h1[0].length); }
   Store.create({ title, html: sanitizeHtml(MD.toHtml(body)), tags });
 }
 function importEnex(xml) {
@@ -214,11 +255,12 @@ function importEnex(xml) {
 async function importBackup(data) {
   if (!data || data.app !== 'margin' || !Array.isArray(data.notes)) throw new Error('Ikke en Notabene-backup');
   let c = 0;
-  for (const b of data.blobs || []) { if (b && b.id && b.dataUrl) await Store.putBlob(b); }
+  for (const b of data.blobs || []) { if (b && typeof b.id === 'string' && /^data:[\w.+-]+\/[\w.+-]+;base64,/.test(b.dataUrl || '')) await Store.putBlob(b); }
   for (const n of data.notes) {
     const cur = Store.get(n.id);
     if (cur && cur.updatedAt >= n.updatedAt) continue;
-    const note = { ...n, dirty: true, baseWid: cur ? cur.baseWid : null, localSeq: (cur?.localSeq || 0) + 1 };
+    if (!n || typeof n.id !== 'string') continue;
+    const note = { ...n, title: String(n.title || ''), html: sanitizeHtml(String(n.html || '<p></p>')), tags: Array.isArray(n.tags) ? n.tags.map(String) : [], dirty: true, baseWid: cur ? cur.baseWid : null, localSeq: (cur?.localSeq || 0) + 1 };
     Store.notes.set(n.id, note); Store.derived.delete(n.id); Store.persist(note); Sync.queue(n.id); c++;
   }
   if (data.meta) { Sync.mergeMeta(data.meta); Store.saveMeta(); }

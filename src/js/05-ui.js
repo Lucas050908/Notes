@@ -244,7 +244,7 @@ function noteRow(n, { q = '', showFolder = true, onOpen } = {}) {
   row.append(sw, inner);
   let lp = null, moved = false;
   inner.addEventListener('click', () => { if (moved) return; haptic.tap(); onOpen ? onOpen(n) : openNote(n.id); });
-  inner.addEventListener('contextmenu', e => { e.preventDefault(); noteActions(n); });
+  inner.addEventListener('contextmenu', e => { e.preventDefault(); if (!moved) noteActions(n); });
   // swipe
   let sx = 0, sy = 0, dx = 0, dir = null;
   inner.addEventListener('touchstart', e => {
@@ -279,7 +279,7 @@ function stickyCard(n, { onOpen } = {}) {
     h('div.meta', { html: [n.favorite ? `<span class="mini-ico star">${icon('star', 'xs')}</span>` : '', `<span>${fmtRel(n.updatedAt)}</span>`, d.tasks.length ? `<span class="tick">${icon('tasks', 'xs')}${done}/${d.tasks.length}</span>` : '', (n.tags || []).slice(0, 2).map(x => `<span class="tag">#${esc(x)}</span>`).join('')].join('') }));
   let lp = null, long = false;
   el.addEventListener('click', () => { if (long) { long = false; return; } haptic.tap(); onOpen ? onOpen(n) : openNote(n.id); });
-  el.addEventListener('contextmenu', e => { e.preventDefault(); noteActions(n); });
+  el.addEventListener('contextmenu', e => { e.preventDefault(); if (!long) noteActions(n); });
   el.addEventListener('touchstart', () => { long = false; lp = setTimeout(() => { long = true; haptic.ok(); noteActions(n); }, 520); }, { passive: true });
   ['touchmove', 'touchend', 'touchcancel'].forEach(ev => el.addEventListener(ev, () => clearTimeout(lp), { passive: true }));
   return el;

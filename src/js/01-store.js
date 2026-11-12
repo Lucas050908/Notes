@@ -58,7 +58,7 @@ const DEVICE_ID = (() => { try { let d = localStorage.getItem('margin.device'); 
 
 const NOTE_COLORS = [['yellow', 'Gul'], ['pink', 'Lyserød'], ['green', 'Grøn'], ['blue', 'Blå'], ['orange', 'Orange'], ['purple', 'Lilla'], ['white', 'Hvid']];
 const FOLDER_COLORS = ['#2f5bff', '#e5484d', '#f08c00', '#2f9e5b', '#7a46d8', '#0b8ea8', '#d6409f', '#6b717d'];
-const DEFAULT_SETTINGS = { name: '', theme: 'dark', edSize: 17, onboarded: false, trashDays: 30, updatedAt: 0 };
+const DEFAULT_SETTINGS = { name: '', theme: 'dark', edSize: 17, onboarded: false, trashDays: 30, remind: true, remindAt: '09:00', updatedAt: 0 };
 
 const Store = {
   notes: new Map(),

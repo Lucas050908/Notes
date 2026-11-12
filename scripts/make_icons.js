@@ -24,3 +24,15 @@ const full = fs.readFileSync(path.join(__dirname, '../assets/icon-full.svg'));
   }
   console.log('icons + splash done');
 })();
+// small monochrome notification icon (white with transparent strokes)
+(async () => {
+  const svg = fs.readFileSync(path.join(__dirname, '../assets/notif.svg'), 'utf8').replace('stroke="#000"', 'stroke="#000" style="mix-blend-mode:normal"');
+  for (const [d, k] of Object.entries({ mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 })) {
+    const dir = path.join(res, 'drawable-' + d); fs.mkdirSync(dir, { recursive: true });
+    const s = Math.round(24 * k);
+    const base = await sharp(Buffer.from(svg), { density: 600 }).resize(s, s).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const px = base.data; for (let i = 0; i < px.length; i += 4) { if (px[i] < 128) px[i + 3] = 0; px[i] = px[i + 1] = px[i + 2] = 255; }
+    await sharp(px, { raw: base.info }).png().toFile(path.join(dir, 'ic_stat_notabene.png'));
+  }
+  console.log('notification icon done');
+})();
