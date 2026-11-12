@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/recent_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="6dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="6dp" android:paddingBottom="6dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/widget_recent_title" android:fontFamily="@font/caveat_bold" android:textColor="#EFEAE0" android:textSize="22sp" android:includeFontPadding="false" android:shadowColor="#99000000" android:shadowRadius="4" android:shadowDy="1" />
+        <ImageView android:id="@+id/recent_add" android:layout_width="34dp" android:layout_height="34dp" android:src="@drawable/widget_add" android:contentDescription="@string/widget_new_note" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
+        <LinearLayout android:id="@+id/card1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"  android:orientation="vertical" android:background="@drawable/widget_card_yellow" android:paddingStart="10dp" android:paddingEnd="8dp" android:paddingTop="10dp" android:paddingBottom="10dp" android:visibility="invisible">
+            <TextView android:id="@+id/card1_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/caveat_bold" android:textColor="#1D1B17" android:textSize="18sp" android:includeFontPadding="false" android:maxLines="2" android:ellipsize="end" />
+            <TextView android:id="@+id/card1_body" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="4dp" android:textColor="#4B4639" android:textSize="11.5sp" android:maxLines="6" android:ellipsize="end" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/card2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical" android:background="@drawable/widget_card_yellow" android:paddingStart="10dp" android:paddingEnd="8dp" android:paddingTop="10dp" android:paddingBottom="10dp" android:visibility="invisible">
+            <TextView android:id="@+id/card2_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/caveat_bold" android:textColor="#1D1B17" android:textSize="18sp" android:includeFontPadding="false" android:maxLines="2" android:ellipsize="end" />
+            <TextView android:id="@+id/card2_body" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="4dp" android:textColor="#4B4639" android:textSize="11.5sp" android:maxLines="6" android:ellipsize="end" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/card3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical" android:background="@drawable/widget_card_yellow" android:paddingStart="10dp" android:paddingEnd="8dp" android:paddingTop="10dp" android:paddingBottom="10dp" android:visibility="invisible">
+            <TextView android:id="@+id/card3_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/caveat_bold" android:textColor="#1D1B17" android:textSize="18sp" android:includeFontPadding="false" android:maxLines="2" android:ellipsize="end" />
+            <TextView android:id="@+id/card3_body" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="4dp" android:textColor="#4B4639" android:textSize="11.5sp" android:maxLines="6" android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:id="@+id/recent_empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#EFEAE0" android:textSize="13sp" android:visibility="gone" android:text="@string/widget_open_first" />
+</LinearLayout>

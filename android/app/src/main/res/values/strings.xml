@@ -9,4 +9,19 @@
     <string name="widget_quick_desc">Skriv en ny note med ét tryk</string>
     <string name="widget_today_label">Notabene · I dag</string>
     <string name="widget_quick_label">Notabene · Ny note</string>
+    <string name="widget_check">Markér som udført</string>
+    <string name="widget_daily">Dagens note</string>
+    <string name="widget_open_first">Åbn Notabene én gang for at vise dine noter her.</string>
+    <string name="widget_recent_title">Seneste noter</string>
+    <string name="widget_habits_title">Vaner</string>
+    <string name="widget_capture_hint">Fang en tanke…</string>
+    <string name="widget_note_desc">Én note som sticky note på hjemmeskærmen</string>
+    <string name="widget_recent_desc">Dine tre seneste noter</string>
+    <string name="widget_habits_desc">Ugens vaner – kryds af direkte</string>
+    <string name="widget_capture_desc">Skriv en tanke eller åbn dagens note</string>
+    <string name="widget_note_label">Notabene · Sticky note</string>
+    <string name="widget_recent_label">Notabene · Seneste</string>
+    <string name="widget_habits_label">Notabene · Vaner</string>
+    <string name="widget_capture_label">Notabene · Fang en tanke</string>
+    <string name="widget_pick_note">Vælg en note</string>
 </resources>

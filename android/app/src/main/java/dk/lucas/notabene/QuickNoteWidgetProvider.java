@@ -14,7 +14,7 @@ public class QuickNoteWidgetProvider extends AppWidgetProvider {
 
     static RemoteViews build(Context ctx) {
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_quick);
-        v.setOnClickPendingIntent(R.id.quick_root, NotabeneWidgetProvider.open(ctx, "new", 3));
+        v.setOnClickPendingIntent(R.id.quick_root, WidgetData.open(ctx, "new", 3));
         return v;
     }
 }

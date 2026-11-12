@@ -38,6 +38,40 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/quick_widget_info" />
         </receiver>
 
+        <receiver android:name=".NoteWidgetProvider" android:label="@string/widget_note_label" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/note_widget_info" />
+        </receiver>
+
+        <receiver android:name=".RecentNotesWidgetProvider" android:label="@string/widget_recent_label" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/recent_widget_info" />
+        </receiver>
+
+        <receiver android:name=".HabitsWidgetProvider" android:label="@string/widget_habits_label" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/habits_widget_info" />
+        </receiver>
+
+        <receiver android:name=".CaptureWidgetProvider" android:label="@string/widget_capture_label" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/capture_widget_info" />
+        </receiver>
+
+        <activity android:name=".NoteWidgetConfigActivity" android:exported="true" android:theme="@android:style/Theme.Material.NoActionBar" android:label="@string/widget_pick_note">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

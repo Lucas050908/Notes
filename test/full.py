@@ -19,7 +19,8 @@ window.Capacitor = {
       readFile: async (o) => ({ data: __native.files[o.path] }), deleteFile: async (o) => { delete __native.files[o.path]; } },
     Share: { share: async (o) => { __native.shared.push(o); } },
     StatusBar: { setStyle: async () => {}, setBackgroundColor: async () => {} },
-    NotabeneWidget: { update: async (o) => { __native.widget = JSON.parse(o.data); }, consumeAction: async () => { const a = __native.pendingAction || null; __native.pendingAction = null; return { action: a }; } },
+    NotabeneWidget: { update: async (o) => { __native.widget = JSON.parse(o.data); }, consumeAction: async () => { const a = __native.pendingAction || null; __native.pendingAction = null; return { action: a }; },
+      consumeOps: async () => { const o = JSON.stringify(__native.ops || []); __native.ops = []; return { ops: o }; } },
     LocalNotifications: { checkPermissions: async () => ({ display: 'granted' }), requestPermissions: async () => ({ display: 'granted' }),
       getPending: async () => ({ notifications: __native.scheduled || [] }), cancel: async () => { __native.scheduled = []; },
       schedule: async (o) => { __native.scheduled = o.notifications; }, addListener: (ev, fn) => { __native.listeners[ev] = fn; } },
@@ -467,6 +468,26 @@ async def main():
             await pg.evaluate(f"__native.pendingAction = 'open:{wid}'; __native.listeners.resume()"); await pg.wait_for_timeout(700)
             expect(await pg.evaluate('Nav.top().noteId') == wid, 'widget task tap did not open its note')
             await pg.evaluate("__native.listeners.backButton()"); await pg.wait_for_timeout(500)
+            # widget data has notes (with colour) and habits
+            wd = await pg.evaluate('__native.widget')
+            expect(wd['notes'] and wd['notes'][0]['color'] and 'snippet' in wd['notes'][0], f"widget notes: {wd['notes'][:1]}")
+            # a task checked in the widget is applied by the app
+            t = [t for t in wd['tasks'] if t['text'] == 'Widgetopgave'][0]
+            await pg.evaluate("__native.ops = [%s]; __native.listeners.resume()" % json.dumps({'t': 'task', 'noteId': t['noteId'], 'i': t['i'], 'text': t['text']})); await pg.wait_for_timeout(800)
+            expect(await pg.evaluate("Tasks.all().find(t => t.text === 'Widgetopgave').done"), 'widget task check not applied')
+            # a habit ticked in the widget is applied
+            hid = await pg.evaluate("Store.upsert('habits', { id: 'h_w', name: 'Gå tur', days: {} }).id"); await pg.wait_for_timeout(1700)
+            expect(any(h['id'] == 'h_w' for h in (await pg.evaluate('__native.widget'))['habits']), 'habit not in widget data')
+            await pg.evaluate("__native.ops = [{ t: 'habit', id: 'h_w', date: ymd(), on: true }]; __native.listeners.resume()"); await pg.wait_for_timeout(800)
+            expect(await pg.evaluate("!!Store.entity('habits','h_w').days[ymd()]"), 'widget habit tick not applied')
+            # capture / daily / habits actions
+            await pg.evaluate("__native.pendingAction = 'daily'; __native.listeners.resume()"); await pg.wait_for_timeout(800)
+            expect(await pg.evaluate("Store.get(Nav.top().noteId)?.kind") == 'daily', 'widget daily action')
+            await pg.evaluate("__native.listeners.backButton()"); await pg.wait_for_timeout(500)
+            await pg.evaluate("__native.pendingAction = 'capture'; __native.listeners.resume()"); await pg.wait_for_timeout(800)
+            expect(await pg.evaluate("document.activeElement.id") == 'capture', 'widget capture action')
+            await pg.evaluate("document.activeElement.blur(); __native.pendingAction = 'habits'; __native.listeners.resume()"); await pg.wait_for_timeout(600)
+            expect('Vaner' in await pg.inner_text('.screen:not(.hidden) .bigtitle'), 'widget habits action')
             # reminders: a task due tomorrow gets one notification at 09:00
             await pg.evaluate("Tasks.add('Påmind mig', ymd(addDays(new Date(), 1)))"); await pg.wait_for_timeout(2600)
             sch = await pg.evaluate("(__native.scheduled || []).map(n => [n.title, new Date(n.schedule.at).getHours(), n.extra.noteId])")

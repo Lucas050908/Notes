@@ -163,7 +163,7 @@ Screens.tasks = (() => {
       { icon: 'trash', label: 'Slet vane', danger: true, onClick: async () => { if (await UI.confirm({ title: 'Slet vane?', text: 'Historikken for vanen slettes også.', ok: 'Slet', danger: true })) { Store.remove('habits', hb.id); render(); } } },
     ]);
   }
-  return { el, render };
+  return { el, render, setMode(m) { mode = m; render(); } };
 })();
 function habitStreak(hb) {
   let d = new Date(), s = 0; if (!hb.days?.[ymd(d)]) d = addDays(d, -1);

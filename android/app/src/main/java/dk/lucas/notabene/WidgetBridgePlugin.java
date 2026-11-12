@@ -11,12 +11,9 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 /** Bridge between the web app and the home screen widgets. */
 @CapacitorPlugin(name = "NotabeneWidget")
 public class WidgetBridgePlugin extends Plugin {
-    static final String PREFS = "notabene_widget";
-    static final String KEY_DATA = "data";
-    static final String KEY_ACTION = "pending_action";
 
     static void setPendingAction(Context ctx, String action) {
-        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_ACTION, action).apply();
+        WidgetData.prefs(ctx).edit().putString(WidgetData.KEY_ACTION, action).apply();
     }
 
     /** Stores the latest snapshot (JSON) and redraws every widget. */
@@ -25,19 +22,27 @@ public class WidgetBridgePlugin extends Plugin {
         String data = call.getString("data");
         if (data == null) { call.reject("data mangler"); return; }
         Context ctx = getContext();
-        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_DATA, data).apply();
-        NotabeneWidgetProvider.refreshAll(ctx);
+        WidgetData.prefs(ctx).edit().putString(WidgetData.KEY_DATA, data).apply();
+        WidgetData.refreshAll(ctx);
         call.resolve();
     }
 
     /** Returns and clears the action from the last widget tap (or null). */
     @PluginMethod
     public void consumeAction(PluginCall call) {
-        SharedPreferences p = getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String a = p.getString(KEY_ACTION, null);
-        p.edit().remove(KEY_ACTION).apply();
+        SharedPreferences p = WidgetData.prefs(getContext());
+        String a = p.getString(WidgetData.KEY_ACTION, null);
+        p.edit().remove(WidgetData.KEY_ACTION).apply();
         JSObject r = new JSObject();
         r.put("action", a);
+        call.resolve(r);
+    }
+
+    /** Returns and clears changes made inside widgets (checked tasks, ticked habits) as a JSON array string. */
+    @PluginMethod
+    public void consumeOps(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("ops", WidgetData.takeOps(getContext()));
         call.resolve(r);
     }
 }
