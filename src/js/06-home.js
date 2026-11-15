@@ -78,7 +78,7 @@ Screens.home = (() => {
     }
 
     // Recent
-    const recent = notes.filter(n => !n.pinned).slice(0, 6);
+    const recent = notes.filter(n => !n.pinned).slice(0, Layout.wide ? 12 : 6);
     if (recent.length) {
       const list = h('div.sticky-grid');
       recent.forEach(n => list.append(stickyCard(n)));
@@ -107,6 +107,13 @@ Screens.home = (() => {
 
     // Activity
     wrap.append(h('div.section', h('div.sec-head', h('h2', { text: 'Aktivitet' })), activityCard()));
+
+    // Wide windows: notes on the left, today/folders/activity in a side column.
+    if (Layout.wide) {
+      const main = h('div.home-main'), side = h('div.home-side');
+      for (const sec of $$(':scope > .section', wrap)) (sec.querySelector('.hscroll, .sticky-grid') ? main : side).append(sec);
+      wrap.append(h('div.home-cols', main, side));
+    }
   }
 
   function pinCard(n) {

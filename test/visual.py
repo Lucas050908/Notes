@@ -177,4 +177,4 @@ async def main():
         print(f"{kind:13} {name:22} {msg[:110]:110} {",".join(sorted(where))}")
     print(f'\n{len(rows)} unikke fund')
 
-asyncio.run(main())
+if __name__ == "__main__": asyncio.run(main())

@@ -5,11 +5,12 @@ async function boot() {
   await Store.init();
   await Store.loadActivity();
   applyTheme();
-  Nav.init(); KB.init(); Native.init();
+  Nav.init(); KB.init(); Native.init(); Sidebar.build();
   Nav.register('home', Screens.home);
   Nav.register('notes', Screens.notes);
   Nav.register('tasks', Screens.tasks);
   Nav.register('assistant', Screens.assistant);
+  Layout.init();
   Nav.tab('home');
   $('#boot')?.remove();
 

@@ -265,6 +265,13 @@ async def main():
             await back(page); await back(page)
         await check('links mellem noter + backlinks', t_wikilink_backlink)
 
+        async def t_title_visible():
+            await ev(page, "openNote(Store.active().find(n => n.title === 'Velkommen til Notabene').id)"); await page.wait_for_timeout(600)
+            hgt = await ev(page, "document.querySelector('.ed-title').getBoundingClientRect().height")
+            expect(hgt > 20, f'title textarea height {hgt}')
+            await back(page)
+        await check('notetitel er synlig i editoren', t_title_visible)
+
         # ---------- organisation ----------
         async def t_folders():
             await page.click('[data-tab=notes]'); await page.wait_for_timeout(300)

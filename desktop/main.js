@@ -25,7 +25,7 @@ function actionFromArgv(argv) {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1100, height: 820, minWidth: 360, minHeight: 520,
+    width: 1360, height: 880, minWidth: 360, minHeight: 520,
     backgroundColor: '#12110f', title: 'Notabene', show: false, autoHideMenuBar: true,
     icon: path.join(APP_DIR, 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, spellcheck: true },

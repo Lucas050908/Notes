@@ -10,6 +10,7 @@ flatpak run dk.lucas.notabene      # eller find Notabene i app-oversigten
 ```
 - Første gang hentes runtime `org.freedesktop.Platform//25.08` automatisk fra Flathub.
 - Højreklik på ikonet giver genvejene **Ny note** og **Dagens note**.
+- I vinduer på mindst 1000 px bruges et desktop-layout: sidebar med navigation, mapper, samlinger og tags, liste og forside i fuld bredde, og noter åbner i et panel til højre. Esc eller Ctrl+W lukker panelet, og Ctrl+1–4 skifter sektion. Smalle vinduer får automatisk mobil-layoutet.
 - Data ligger i `~/.var/app/dk.lucas.notabene/config/Notabene/`, og daglige backups ligger i `backups/` under den mappe.
 - Påmindelser vises som GNOME-notifikationer, mens appen er åben.
 - En ny version installeres ved at installere den nye .flatpak-fil. Dine noter bliver liggende.

@@ -29,7 +29,7 @@ class Editor {
     const screen = this.screen = {
       el: this.el, noteId: this.id, noFab: true, flushSave: () => { if (this.dirtyLocal) this.flush(); },
       render: () => this.renderMeta(),
-      onShow: () => { if (opts.isNew) setTimeout(() => this.title.focus(), 380); else if (opts.highlight) setTimeout(() => this.findText(opts.highlight), 400); },
+      onShow: () => { requestAnimationFrame(() => this.autoTitle()); if (opts.isNew) setTimeout(() => this.title.focus(), 380); else if (opts.highlight) setTimeout(() => this.findText(opts.highlight), 400); },
       onHide: () => this.close(),
     };
     this.offNotes = Bus.on('notes', e => { if (e.id === this.id && e.type === 'remote') this.onRemote(); if (e.id === this.id && e.type === 'delete') { if (Nav.top() === screen) Nav.pop(); } });
@@ -46,7 +46,8 @@ class Editor {
     this.status = h('div.status', { html: '<i></i><span>Gemt</span>' });
     this.aiBtn = h('button.iconbtn.accent' + (AI.available ? '' : '.hidden'), { 'aria-label': 'AI-værktøjer', title: 'AI', html: icon('spark'), onclick: () => AI.editorSheet(this) });
     const bar = h('header.topbar.ed-top',
-      h('button.backbtn', { 'aria-label': 'Tilbage', html: icon('back') + `<span>${esc(backLabel)}</span>`, onclick: () => Nav.pop() }),
+      Layout.wide ? h('button.backbtn', { 'aria-label': 'Luk note', title: 'Luk (Esc)', html: icon('close', 'sm') + '<span>Luk</span>', onclick: () => Nav.pop() })
+        : h('button.backbtn', { 'aria-label': 'Tilbage', html: icon('back') + `<span>${esc(backLabel)}</span>`, onclick: () => Nav.pop() }),
       h('div', { style: { flex: 1 } }), this.status, this.aiBtn,
       h('button.iconbtn', { 'aria-label': 'Flere valg', html: icon('more'), onclick: () => this.moreMenu() }));
     this.offAI = Bus.on('ai', () => this.aiBtn.classList.toggle('hidden', !AI.available));
@@ -186,7 +187,7 @@ class Editor {
     if (rel.length) { this.links.append(h('h4', { style: { marginTop: back.length ? '18px' : 0 }, text: 'Relaterede noter' })); rel.forEach(r => this.links.append(card(r.n, true))); }
   }, 600);
 
-  autoTitle() { this.title.style.height = 'auto'; this.title.style.height = this.title.scrollHeight + 'px'; }
+  autoTitle() { if (!this.title.isConnected) return; this.title.style.height = 'auto'; this.title.style.height = Math.max(this.title.scrollHeight, 36) + 'px'; }
 
   /** Ensure the body is a list of valid blocks and always ends with a paragraph you can type into. */
   normalize() {

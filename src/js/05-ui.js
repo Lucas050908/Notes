@@ -31,6 +31,16 @@ const Nav = {
   },
   register(name, screen) { this.tabs[name] = screen; screen.el.classList.add('hidden'); this.app.append(screen.el); },
   push(screen) {
+    // Wide windows: notes open in a side pane next to the list; other screens replace the pane.
+    const cur = this.top();
+    if (cur && cur.pane) this.popInstant();
+    if (Layout.wide && screen.noteId) {
+      screen.pane = true; screen.el.classList.add('pane', 'enter');
+      this.app.append(screen.el); this.stack.push(screen); this.app.classList.add('has-pane');
+      requestAnimationFrame(() => requestAnimationFrame(() => screen.el.classList.remove('enter')));
+      this.chrome(); screen.onShow && screen.onShow();
+      return;
+    }
     const prev = this.top();
     screen.el.classList.add('enter');
     this.app.append(screen.el);
@@ -45,10 +55,13 @@ const Nav = {
     s.el.classList.add('leave');
     const prev = this.top(); prev && prev.el.classList.remove('under');
     setTimeout(() => { s.el.remove(); s.destroy && s.destroy(); }, 380);
+    this.app.classList.toggle('has-pane', this.stack.some(x => x.pane));
     this.chrome();
     prev && prev.render && prev.render();
   },
-  popInstant() { const s = this.stack.pop(); if (!s) return; s.onHide && s.onHide(); s.el.remove(); s.destroy && s.destroy(); const t = this.top(); t && t.el.classList.remove('under'); this.chrome(); },
+  popInstant() { const s = this.stack.pop(); if (!s) return; s.onHide && s.onHide(); s.el.remove(); s.destroy && s.destroy(); const t = this.top(); t && t.el.classList.remove('under'); this.app.classList.toggle('has-pane', this.stack.some(x => x.pane)); this.chrome(); },
+  /** Close everything that is pushed (used by the sidebar before it navigates). */
+  reset() { while (this.stack.length) this.popInstant(); },
   top() { return this.stack[this.stack.length - 1] || this.tabs[this.current]; },
   chrome() {
     const t = this.top();
@@ -56,6 +69,7 @@ const Nav = {
     this.tabbar.classList.toggle('away', hideTab);
     this.fab.classList.toggle('away', !!(hideTab || this.current === 'assistant' || (t && t.noFab)));
     $$('.composer').forEach(c => c.classList.toggle('hidden', hideTab || this.current !== 'assistant' || !AI.available));
+    if (Layout.wide) Sidebar.render();
   },
   refresh() { const t = this.top(); t && t.render && t.render(); for (const s of this.stack) if (s !== t && s.stale !== undefined) s.stale = true; },
   edgeSwipe() {

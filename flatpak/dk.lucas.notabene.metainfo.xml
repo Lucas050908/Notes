@@ -25,6 +25,7 @@
   <content_rating type="oars-1.1"/>
   <categories><category>Office</category><category>Utility</category></categories>
   <releases>
+    <release version="1.2.0" date="2026-11-15"><description><p>Desktop-layout med sidebar og note-panel, der udnytter hele skærmen.</p></description></release>
     <release version="1.1.0" date="2026-11-15"><description><p>Første udgave til Linux.</p></description></release>
   </releases>
 </component>
