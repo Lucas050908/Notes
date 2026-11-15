@@ -82,12 +82,28 @@ jobs:
         with:
           name: linux-unpacked
       - run: mkdir -p desktop/dist && tar -C desktop/dist -xzf linux-unpacked.tar.gz
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      - name: Byg Flatpak
+        run: |
+          set -o pipefail
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
+            --repo=repo build flatpak/dk.lucas.notabene.yml 2>&1 | tee build.log
+          flatpak build-bundle repo Notabene-1.1.${{ github.run_number }}.flatpak dk.lucas.notabene \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo 2>&1 | tee -a build.log
+          ls -la *.flatpak
+      - name: Gem byggelog ved fejl
+        if: failure()
+        run: |
+          git config --global --add safe.directory "$PWD"
+          git config user.name ci; git config user.email ci@users.noreply.github.com
+          tail -c 60000 build.log > /tmp/last-build.log 2>/dev/null || echo "ingen log" > /tmp/last-build.log
+          git checkout --orphan ci-logs-tmp && git rm -rfq --cached . >/dev/null
+          cp /tmp/last-build.log last-build.log && git add -f last-build.log && git commit -qm "flatpak log"
+          git push -f origin HEAD:ci-logs
+      - uses: actions/upload-artifact@v4
         with:
-          bundle: Notabene-1.1.${{ github.run_number }}.flatpak
-          manifest-path: flatpak/dk.lucas.notabene.yml
-          cache-key: flatpak-builder-${{ github.sha }}
-          upload-artifact: true
+          name: flatpak
+          path: '*.flatpak'
 
   release:
     needs: [apk, flatpak]
