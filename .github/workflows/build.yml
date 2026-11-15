@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+# The workflow was renamed (run numbers restarted); the offset keeps versions above earlier APKs (1.0.8).
+env:
+  BUILD_OFFSET: 10
+
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -16,6 +20,7 @@ jobs:
   apk:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "V=$(( ${{ github.run_number }} + 10 ))" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -38,11 +43,11 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon \
-            -PversionCode=${{ github.run_number }} \
-            -PversionName=1.0.${{ github.run_number }}
+            -PversionCode=${{ env.V }} \
+            -PversionName=1.0.${{ env.V }}
       - run: |
           mkdir -p out
-          cp android/app/build/outputs/apk/release/app-release.apk out/Notabene-1.0.${{ github.run_number }}.apk
+          cp android/app/build/outputs/apk/release/app-release.apk out/Notabene-1.0.${{ env.V }}.apk
       - uses: actions/upload-artifact@v4
         with:
           name: apk
@@ -51,6 +56,7 @@ jobs:
   desktop:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "V=$(( ${{ github.run_number }} + 10 ))" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -61,7 +67,7 @@ jobs:
         working-directory: desktop
         run: |
           npm ci
-          npm pkg set version=1.1.${{ github.run_number }}
+          npm pkg set version=1.1.${{ env.V }}
           npm run dist
       - name: Pak Linux-mappen
         run: tar -C desktop/dist -czf linux-unpacked.tar.gz linux-unpacked
@@ -77,6 +83,7 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
       options: --privileged
     steps:
+      - run: echo "V=$(( ${{ github.run_number }} + 10 ))" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
@@ -88,9 +95,23 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
             --repo=repo build flatpak/dk.lucas.notabene.yml 2>&1 | tee build.log
-          flatpak build-bundle repo Notabene-1.1.${{ github.run_number }}.flatpak dk.lucas.notabene \
+          flatpak build-bundle repo Notabene-1.1.${{ env.V }}.flatpak dk.lucas.notabene \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo 2>&1 | tee -a build.log
           ls -la *.flatpak
+      - name: Røgtest – installér og start Flatpak'en
+        run: |
+          set -o pipefail
+          flatpak install --user -y --noninteractive ./Notabene-1.1.${{ env.V }}.flatpak 2>&1 | tee -a build.log
+          export $(dbus-launch) || true
+          (xvfb-run -a flatpak run dk.lucas.notabene --remote-debugging-port=9333 > app.log 2>&1 &)
+          ok=0
+          for i in $(seq 1 30); do
+            if curl -s http://127.0.0.1:9333/json | grep -q 'app://notabene/index.html'; then ok=1; break; fi
+            sleep 2
+          done
+          cat app.log | tail -20 | tee -a build.log
+          curl -s http://127.0.0.1:9333/json | tee -a build.log
+          test "$ok" = 1
       - name: Gem byggelog ved fejl
         if: failure()
         run: |
@@ -109,6 +130,7 @@ jobs:
     needs: [apk, flatpak]
     runs-on: ubuntu-latest
     steps:
+      - run: echo "V=$(( ${{ github.run_number }} + 10 ))" >> $GITHUB_ENV
       - uses: actions/download-artifact@v4
         with:
           path: dl
@@ -119,14 +141,14 @@ jobs:
           ls -la out
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Notabene 1.0.${{ github.run_number }}
+          tag_name: v1.0.${{ env.V }}
+          name: Notabene 1.0.${{ env.V }}
           body: |
-            **Android:** download `Notabene-1.0.${{ github.run_number }}.apk` og åbn den på telefonen.
+            **Android:** download `Notabene-1.0.${{ env.V }}.apk` og åbn den på telefonen.
 
-            **Linux (Bluefin, Fedora Silverblue, Ubuntu m.fl.):** download `Notabene-1.1.${{ github.run_number }}.flatpak` og dobbeltklik på den, eller kør:
+            **Linux (Bluefin, Fedora Silverblue, Ubuntu m.fl.):** download `Notabene-1.1.${{ env.V }}.flatpak` og dobbeltklik på den, eller kør:
             ```
-            flatpak install --user ./Notabene-1.1.${{ github.run_number }}.flatpak
+            flatpak install --user ./Notabene-1.1.${{ env.V }}.flatpak
             ```
           files: out/*
           make_latest: true
