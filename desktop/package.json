@@ -1,0 +1,28 @@
+{
+  "name": "notabene",
+  "productName": "Notabene",
+  "version": "1.1.0",
+  "description": "Noter, opgaver og idéer som sticky notes",
+  "main": "main.js",
+  "desktopName": "dk.lucas.notabene.desktop",
+  "author": "Lucas",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "prepare-app": "node -e \"require('fs').mkdirSync('app',{recursive:true});require('fs').copyFileSync('../www/index.html','app/index.html');require('fs').copyFileSync('../flatpak/icons/512.png','app/icon.png')\"",
+    "start": "npm run prepare-app && electron .",
+    "dist": "npm run prepare-app && electron-builder --linux dir --x64"
+  },
+  "devDependencies": {
+    "electron": "44.10.1",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "dk.lucas.notabene",
+    "productName": "Notabene",
+    "executableName": "notabene",
+    "files": ["main.js", "preload.js", "app/**"],
+    "linux": { "target": ["dir"], "category": "Office" },
+    "electronLanguages": ["da", "en-US"]
+  }
+}

@@ -591,3 +591,15 @@ mark.hl-orange { background: var(--hl-orange); color: inherit; border-radius: 3p
 .ed-body .due.today { color: color-mix(in srgb, var(--warn) 78%, var(--ink)); }
 .ed-body .due.over { color: color-mix(in srgb, var(--danger) 80%, var(--ink)); }
 .row-meta .tag, .searchpill kbd { color: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
+/* ---------- Desktop (wide windows): floating tab bar, roomier layout ---------- */
+@media (min-width: 900px) {
+  .tabbar { left: 50%; right: auto; width: 520px; transform: translateX(-50%); bottom: 16px; height: var(--tabbar-h); padding-bottom: 0; border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-lg); }
+  .tabbar.away { transform: translate(-50%, 140%); }
+  .tab-pad { padding-bottom: calc(var(--tabbar-h) + 120px); }
+  .composer { bottom: calc(var(--tabbar-h) + 24px); }
+  .toast { bottom: calc(var(--tabbar-h) + 40px); }
+  .sticky-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+}
+html.desktop ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.desktop ::-webkit-scrollbar-thumb { background: var(--fill-2); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+html.desktop ::-webkit-scrollbar-track { background: transparent; }

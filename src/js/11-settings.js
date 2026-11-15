@@ -106,12 +106,13 @@ function openSettings() {
         AI.provider === 'api' ? item('wand', 'Model', ({ 'claude-sonnet-5-5': 'Sonnet 5.5', 'claude-haiku-5-5': 'Haiku 5.5', 'claude-opus-5-5': 'Opus 5.5' })[AI.model] || esc(AI.model), () => UI.menu('Model', [['claude-sonnet-5-5', 'Sonnet 5.5 · anbefalet'], ['claude-haiku-5-5', 'Haiku 5.5 · hurtigst og billigst'], ['claude-opus-5-5', 'Opus 5.5 · stærkest']].map(([k, l]) => ({ label: l, right: k === AI.model ? icon('check', 'sm') : '', onClick: async () => { AI.model = k; await Store.kvSet('aiModel', k); s.render(); } })))) : null),
       ...group('Data',
         h('div.mi', { html: icon(Sync.state === 'local' ? 'lock' : 'cloud') + `<span>${Sync.state === 'local' ? 'Gemt på denne enhed' : 'Synkronisering'}<small style="display:block;color:var(--ink-3);font-size:13px">${esc(Sync.state === 'local' ? (IDB.persistent ? 'Fungerer helt offline. Tag backup jævnligt.' : 'Lagring er midlertidig i denne visning.') : (Sync.message || Sync.label()))}</small></span><span class="r"><span class="sync-dot ${Sync.state === 'synced' || Sync.state === 'local' ? 'ok' : Sync.state === 'error' ? 'err' : 'busy'}"></span></span>` }),
-        Native.on ? item('history', 'Automatiske backups', 'Dagligt', () => AutoBackup.sheet()) : null,
+        (Native.on || Desktop.on) ? item('history', 'Automatiske backups', 'Dagligt', () => AutoBackup.sheet()) : null,
         item('download', 'Tag backup (JSON)', `${all} noter`, () => exportBackup()),
         item('download', 'Eksportér som Markdown (zip)', null, () => exportMarkdownZip()),
         item('upload', 'Importér', 'MD, TXT, HTML, JSON, ENEX', () => importFiles())),
       ...(Reminders.supported ? group('Påmindelser',
         h('button.mi', { html: icon('clock') + '<span>Påmind om opgaver med dato</span>' + `<span class="sw${Store.setting('remind') !== false ? ' on' : ''}"></span>`, onclick: async () => { const on = Store.setting('remind') === false; if (on && !await Reminders.permitted(true)) { UI.toast('Tillad notifikationer for Notabene i Android-indstillingerne'); } Store.setSetting('remind', on); s.render(); } }),
+        Desktop.on ? h('div.mi', { html: icon('info') + '<span style="font-size:14px;color:var(--ink-2)">På computeren kommer påmindelser, mens Notabene er åben.</span>' }) : null,
         item('clock', 'Tidspunkt', esc(Store.setting('remindAt') || '09:00'), () => UI.menu('Påmind kl.', ['07:00', '08:00', '09:00', '12:00', '17:00', '20:00'].map(t => ({ label: t, right: t === (Store.setting('remindAt') || '09:00') ? icon('check', 'sm') : '', onClick: () => { Store.setSetting('remindAt', t); s.render(); } }))))) : []),
       ...group('Papirkurv', item('trash', 'Slet automatisk efter', `${Store.setting('trashDays') || 30} dage`, () => UI.menu('Slet efter', [7, 30, 90, 365].map(d => ({ label: `${d} dage`, right: d === (Store.setting('trashDays') || 30) ? icon('check', 'sm') : '', onClick: () => { Store.setSetting('trashDays', d); s.render(); } }))))),
       h('div.fmt-label', { text: 'Om' }),
@@ -159,7 +160,7 @@ async function backupData() {
 }
 /* Daily automatic backup inside the app's private storage (Android), last 7 kept. */
 const AutoBackup = {
-  get FS() { return Native.on ? Native.plugin('Filesystem') : null; },
+  get FS() { return Native.on ? Native.plugin('Filesystem') : (window.notabeneDesktop ? Desktop.FS : null); },
   async run(force = false) {
     const FS = this.FS; if (!FS || !Store.notes.size) return;
     const last = await Store.kvGet('autoBackupAt');
@@ -178,7 +179,7 @@ const AutoBackup = {
   async sheet() {
     const files = await this.list();
     Sheet.open({ title: 'Automatiske backups', build: (body, sheet) => {
-      body.append(h('p', { style: { color: 'var(--ink-2)', fontSize: '14px', margin: '0 0 12px' }, text: 'Notabene gemmer én backup om dagen på telefonen og beholder de seneste 7. Når du gendanner, kommer slettede og ældre noter tilbage. Nyere ændringer bevares.' }));
+      body.append(h('p', { style: { color: 'var(--ink-2)', fontSize: '14px', margin: '0 0 12px' }, text: (Desktop.on ? 'Notabene gemmer én backup om dagen på computeren' : 'Notabene gemmer én backup om dagen på telefonen') + ' og beholder de seneste 7. Når du gendanner, kommer slettede og ældre noter tilbage. Nyere ændringer bevares.' }));
       if (!files.length) body.append(UI.empty('history', 'Ingen backups endnu', 'Den første laves automatisk i dag.'));
       const list = h('div.menu-list');
       files.forEach(f => list.append(h('button.mi', { html: icon('history') + `<span>${esc(f.name.replace(/^notabene-|\.json$/g, ''))}</span>` + (f.size ? `<span class="r">${fmtSize(f.size)}</span>` : ''), onclick: async () => {
@@ -188,6 +189,7 @@ const AutoBackup = {
       } })));
       if (files.length) body.append(list);
       body.append(h('button.btn.ghost.block', { style: { marginTop: '14px' }, text: 'Tag backup nu', onclick: async () => { await this.run(true); sheet.close(); UI.toast('Backup gemt'); } }));
+      if (Desktop.on) body.append(h('button.btn.ghost.block', { style: { marginTop: '8px' }, text: 'Åbn backup-mappen', onclick: () => Desktop.api.backup.openFolder() }));
     } });
   },
 };

@@ -2,6 +2,19 @@
 
 En mobile-first notes-app med sticky note-look og dark mode som standard. Den er bygget som en web-app (vanilla JS, ingen framework) og pakket til Android med Capacitor.
 
+## Linux (Bluefin, Fedora Silverblue, Ubuntu …)
+Under **Releases** ligger også `Notabene-1.1.X.flatpak`. Dobbeltklik på filen, så åbner GNOME Software, eller kør:
+```bash
+flatpak install --user ./Notabene-1.1.X.flatpak
+flatpak run dk.lucas.notabene      # eller find Notabene i app-oversigten
+```
+- Første gang hentes runtime `org.freedesktop.Platform//25.08` automatisk fra Flathub.
+- Højreklik på ikonet giver genvejene **Ny note** og **Dagens note**.
+- Data ligger i `~/.var/app/dk.lucas.notabene/config/Notabene/`, og daglige backups ligger i `backups/` under den mappe.
+- Påmindelser vises som GNOME-notifikationer, mens appen er åben.
+- En ny version installeres ved at installere den nye .flatpak-fil. Dine noter bliver liggende.
+- Desktop-skallen ligger i `desktop/` (Electron) og Flatpak-manifestet i `flatpak/`.
+
 ## Hent APK'en
 Hver gang der pushes til `main`, bygger GitHub Actions en signeret APK:
 **Releases → seneste version → `Notabene-1.0.X.apk`**. Åbn filen på telefonen og tillad installation fra ukendte kilder første gang. Nye builds installeres oven på den gamle, og dine noter bliver liggende.

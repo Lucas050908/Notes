@@ -48,7 +48,7 @@ const Nav = {
     this.chrome();
     prev && prev.render && prev.render();
   },
-  popInstant() { const s = this.stack.pop(); if (!s) return; s.onHide && s.onHide(); s.el.remove(); s.destroy && s.destroy(); },
+  popInstant() { const s = this.stack.pop(); if (!s) return; s.onHide && s.onHide(); s.el.remove(); s.destroy && s.destroy(); const t = this.top(); t && t.el.classList.remove('under'); this.chrome(); },
   top() { return this.stack[this.stack.length - 1] || this.tabs[this.current]; },
   chrome() {
     const t = this.top();
@@ -405,7 +405,7 @@ const KB = {
       // Overlay keyboards (iOS, claude.ai) shrink the visual viewport; resizing keyboards (Android app) shrink the window itself.
       const offset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
       this.offset = offset > 120 ? offset : 0;
-      this.open = offset > 120 || this.maxH - window.innerHeight > 150;
+      this.open = offset > 120 || (!window.notabeneDesktop && this.maxH - window.innerHeight > 150);
       document.documentElement.style.setProperty('--kb', this.offset + 'px');
       document.body.classList.toggle('kb-open', this.open);
       Bus.emit('kb', this.offset);

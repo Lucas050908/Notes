@@ -52,11 +52,7 @@ const Widget = {
     if (n) Nav.refresh();
     return n;
   },
-  async consume() {
-    const p = this.plugin; if (!p) return;
-    if (await this.applyOps()) this.push();
-    let a = null; try { a = (await p.consumeAction()).action; } catch (e) { return; }
-    if (!a) return;
+  handle(a) {
     Pop.close(); while (Sheet.stack.length) Sheet.stack[Sheet.stack.length - 1].close();
     if (a === 'new') { if (Nav.stack.length) Nav.tab('home'); setTimeout(() => newNote(), Nav.stack.length ? 420 : 0); }
     else if (a === 'tasks') Nav.tab('tasks');
@@ -65,5 +61,11 @@ const Widget = {
     else if (a === 'daily') { if (Nav.stack.length) Nav.tab('home'); setTimeout(() => openDaily(), Nav.stack.length ? 420 : 0); }
     else if (a === 'capture') { Nav.tab('home'); setTimeout(() => { const c = $('#capture'); if (c) { c.focus(); c.scrollIntoView({ block: 'center' }); } }, 350); }
     else if (a.startsWith('open:')) { const id = a.slice(5); if (Store.get(id)) openNote(id); else Nav.tab('tasks'); }
+  },
+  async consume() {
+    const p = this.plugin; if (!p) return;
+    if (await this.applyOps()) this.push();
+    let a = null; try { a = (await p.consumeAction()).action; } catch (e) { return; }
+    if (a) this.handle(a);
   },
 };

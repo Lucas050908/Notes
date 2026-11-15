@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=Notabene
+GenericName=Noter
+Comment=Noter, opgaver og idéer som sticky notes
+Exec=notabene %U
+Icon=dk.lucas.notabene
+Terminal=false
+Categories=Office;Utility;
+Keywords=noter;notes;opgaver;todo;tasks;dagbog;journal;sticky;
+StartupNotify=true
+StartupWMClass=notabene
+Actions=new-note;daily;
+
+[Desktop Action new-note]
+Name=Ny note
+Exec=notabene --new-note
+
+[Desktop Action daily]
+Name=Dagens note
+Exec=notabene --daily

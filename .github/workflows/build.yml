@@ -1,0 +1,116 @@
+name: Byg Notabene (Android + Linux)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Android SDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+      - run: npm ci
+      - run: python3 scripts/build_web.py
+      - run: npx cap sync android
+      - name: Byg APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -PversionCode=${{ github.run_number }} \
+            -PversionName=1.0.${{ github.run_number }}
+      - run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk out/Notabene-1.0.${{ github.run_number }}.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: out/*.apk
+
+  desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: python3 scripts/build_web.py
+      - name: Byg Electron-app
+        working-directory: desktop
+        run: |
+          npm ci
+          npm pkg set version=1.1.${{ github.run_number }}
+          npm run dist
+      - name: Pak Linux-mappen
+        run: tar -C desktop/dist -czf linux-unpacked.tar.gz linux-unpacked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-unpacked
+          path: linux-unpacked.tar.gz
+
+  flatpak:
+    needs: desktop
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-unpacked
+      - run: mkdir -p desktop/dist && tar -C desktop/dist -xzf linux-unpacked.tar.gz
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: Notabene-1.1.${{ github.run_number }}.flatpak
+          manifest-path: flatpak/dk.lucas.notabene.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: true
+
+  release:
+    needs: [apk, flatpak]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dl
+      - run: |
+          mkdir -p out
+          find dl -name '*.apk' -exec cp {} out/ \;
+          find dl -name '*.flatpak' -exec cp {} out/ \;
+          ls -la out
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Notabene 1.0.${{ github.run_number }}
+          body: |
+            **Android:** download `Notabene-1.0.${{ github.run_number }}.apk` og åbn den på telefonen.
+
+            **Linux (Bluefin, Fedora Silverblue, Ubuntu m.fl.):** download `Notabene-1.1.${{ github.run_number }}.flatpak` og dobbeltklik på den, eller kør:
+            ```
+            flatpak install --user ./Notabene-1.1.${{ github.run_number }}.flatpak
+            ```
+          files: out/*
+          make_latest: true

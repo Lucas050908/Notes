@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dk.lucas.notabene</id>
+  <name>Notabene</name>
+  <summary>Noter, opgaver og idéer som sticky notes</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+  <developer id="dk.lucas"><name>Lucas</name></developer>
+  <description>
+    <p>Notabene er en hurtig notes-app med sticky note-look og mørkt tema. Skriv med Markdown-genveje, saml opgaver fra alle noter ét sted, og hold styr på vaner, dagbog og skabeloner.</p>
+    <ul>
+      <li>Rich text med tjeklister, tabeller, billeder og links mellem noter</li>
+      <li>Opgaver med datoer og påmindelser</li>
+      <li>Mapper, tags, smarte samlinger og hurtig søgning, der tåler stavefejl</li>
+      <li>AI-assistent med din egen Anthropic-nøgle</li>
+      <li>Virker offline med automatisk daglig backup</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">dk.lucas.notabene.desktop</launchable>
+  <url type="homepage">https://github.com/Lucas050908/Notes</url>
+  <branding>
+    <color type="primary" scheme_preference="light">#f3d867</color>
+    <color type="primary" scheme_preference="dark">#1a1915</color>
+  </branding>
+  <content_rating type="oars-1.1"/>
+  <categories><category>Office</category><category>Utility</category></categories>
+  <releases>
+    <release version="1.1.0" date="2026-11-15"><description><p>Første udgave til Linux.</p></description></release>
+  </releases>
+</component>

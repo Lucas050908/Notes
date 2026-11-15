@@ -226,7 +226,7 @@ function templatePicker() {
 
 /* ---------- Reminders: native notifications for dated tasks (Android app) ---------- */
 const Reminders = {
-  get LN() { return Native.on ? Native.plugin('LocalNotifications') : null; },
+  get LN() { return Native.on ? Native.plugin('LocalNotifications') : (window.notabeneDesktop ? Desktop.LN : null); },
   get supported() { return !!this.LN; },
   init() {
     if (!this.supported) return;

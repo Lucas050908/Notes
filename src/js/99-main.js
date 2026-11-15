@@ -39,6 +39,7 @@ async function boot() {
   Sync.start();
   Reminders.init();
   Widget.init();
+  Desktop.init();
   setTimeout(() => AutoBackup.run(), 4000);
   Bus.on('pause', () => AutoBackup.run());
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
