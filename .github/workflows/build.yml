@@ -103,7 +103,7 @@ jobs:
           set -o pipefail
           flatpak install --user -y --noninteractive ./Notabene-1.1.${{ env.V }}.flatpak 2>&1 | tee -a build.log
           export $(dbus-launch) || true
-          (xvfb-run -a flatpak run dk.lucas.notabene --remote-debugging-port=9333 > app.log 2>&1 &)
+          (xvfb-run -a flatpak run dk.lucas.notabene --no-sandbox --remote-debugging-port=9333 > app.log 2>&1 &)  # CI runs as root; normal users keep the sandbox
           ok=0
           for i in $(seq 1 30); do
             if curl -s http://127.0.0.1:9333/json | grep -q 'app://notabene/index.html'; then ok=1; break; fi
