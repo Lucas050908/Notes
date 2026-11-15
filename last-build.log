@@ -1,0 +1,78 @@
+Dependency Sdk: org.freedesktop.Sdk 25.08
+Installing org.freedesktop.Sdk/x86_64/25.08 from flathub
+Installing runtime/org.freedesktop.Platform.GL.default/x86_64/25.08
+Installing runtime/org.freedesktop.Platform.GL.default/x86_64/25.08-extra
+Installing runtime/org.freedesktop.Platform.codecs-extra/x86_64/25.08-extra
+Installing runtime/org.freedesktop.Sdk.Locale/x86_64/25.08
+Installing runtime/org.freedesktop.Sdk/x86_64/25.08
+Dependency Runtime: org.freedesktop.Platform 25.08
+Installing org.freedesktop.Platform/x86_64/25.08 from flathub
+Installing runtime/org.freedesktop.Platform.Locale/x86_64/25.08
+Installing runtime/org.freedesktop.Platform/x86_64/25.08
+Dependency Base: org.electronjs.Electron2.BaseApp 25.08
+Installing org.electronjs.Electron2.BaseApp/x86_64/25.08 from flathub
+Installing app/org.electronjs.Electron2.BaseApp/x86_64/25.08
+Downloading sources
+Initializing build dir
+Committing stage init to cache
+Starting build of dk.lucas.notabene
+========================================================================
+Building module notabene in /__w/Notes/Notes/.flatpak-builder/build/notabene-1
+========================================================================
+Running: cp -a notabene /app/notabene
+Running: rm -f /app/notabene/chrome-sandbox
+Running: install -Dm755 notabene.sh /app/bin/notabene
+Running: install -Dm644 dk.lucas.notabene.desktop /app/share/applications/dk.lucas.notabene.desktop
+Running: install -Dm644 dk.lucas.notabene.metainfo.xml /app/share/metainfo/dk.lucas.notabene.metainfo.xml
+Running: for s in 64 128 256 512; do install -Dm644 icons/$s.png /app/share/icons/hicolor/${s}x${s}/apps/dk.lucas.notabene.png; done
+Running: install -Dm644 icons/dk.lucas.notabene.svg /app/share/icons/hicolor/scalable/apps/dk.lucas.notabene.svg
+compressing debuginfo in: /__w/Notes/Notes/build/files/notabene/libvulkan.so.1
+processing: /__w/Notes/Notes/build/files/notabene/libvulkan.so.1
+[30] .debug_abbrev compressed -> .zdebug_abbrev (1950 => 119 6.10%)
+[31] .debug_info compressed -> .zdebug_info (3440 => 2002 58.20%)
+[32] .debug_ranges compressed -> .zdebug_ranges (132624 => 22805 17.20%)
+[33] .debug_str compressed -> .zdebug_str (2288 => 198 8.65%)
+[34] .debug_addr compressed -> .zdebug_addr (254616 => 58847 23.11%)
+[35] .debug_line compressed -> .zdebug_line (379109 => 114084 30.09%)
+[36] .debug_frame compressed -> .zdebug_frame (46376 => 6844 14.76%)
+[39] Updating section string table
+stripping /__w/Notes/Notes/build/files/notabene/libvulkan.so.1 to /__w/Notes/Notes/build/files/lib/debug/notabene/libvulkan.so.1.debug
+Committing stage build-notabene to cache
+Cleaning up
+Running appstreamcli compose
+Only accepting components: dk.lucas.notabene, dk.lucas.notabene.desktop
+Processing directory: /__w/Notes/Notes/build/files
+Composing metadata...
+Success!
+Committing stage cleanup to cache
+Finishing app
+Exporting share/applications/dk.lucas.notabene.desktop
+Exporting share/icons/hicolor/64x64/apps/dk.lucas.notabene.png
+Exporting share/icons/hicolor/256x256/apps/dk.lucas.notabene.png
+Exporting share/icons/hicolor/scalable/apps/dk.lucas.notabene.svg
+Exporting share/icons/hicolor/512x512/apps/dk.lucas.notabene.png
+Exporting share/icons/hicolor/128x128/apps/dk.lucas.notabene.png
+Exporting share/metainfo/dk.lucas.notabene.metainfo.xml
+Please review the exported files and the metadata
+Committing stage finish to cache
+Exporting dk.lucas.notabene to repo
+Commit: 29b847752919dc01f897bd211e5c5bf570b07eb7c0f4cc8e568ae4085a795f6d
+Metadata Total: 471
+Metadata Written: 221
+Content Total: 270
+Content Written: 238
+Content Bytes Written: 296543986 (296.5 MB)
+Exporting dk.lucas.notabene.Debug to repo
+Commit: b82a61a6b98d3a58e62545be06e12af0a272260e8ec4c5dcb0cf7084788f2dfa
+Metadata Total: 9
+Metadata Written: 4
+Content Total: 2
+Content Written: 2
+Content Bytes Written: 1219910 (1.2 MB)
+Pruning cache
+Installing app/dk.lucas.notabene/x86_64/master
+F: Can't find a11y bus: GDBus.Error:org.a11y.Bus.Error: Failed to spawn child process “/usr/bin/dbus-daemon” (No such file or directory)
+[2 zypak-helper] Error retrieving version property: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Flatpak was not provided by any .service files
+[2 zypak-helper] Error retrieving supports property: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Flatpak was not provided by any .service files
+[2 zypak-helper] WARNING: Unknown portal version
+[1115/135023.847291:FATAL:electron/shell/app/electron_main_delegate.cc:227] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.
